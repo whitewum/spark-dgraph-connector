@@ -28,8 +28,6 @@ Example code:
 The connector is at an early stage, but is being continuously developed. It has the following limitations:
 
 - **Read-only**: The connector does not support mutating the graph ([issue #8](https://github.com/G-Research/spark-dgraph-connector/issues/8)).
-- **Not transaction-aware**: Individual partitions do not read the same transaction. The graph should not be
-  modified while reading it into Spark ([issue #6](https://github.com/G-Research/spark-dgraph-connector/issues/6)).
 - **No filter push-down**: The connector does not support any filter push-down. It always reads the
   entire graph into Spark where then filters get applied (e.g. filter for predicates, uids or values) ([issue #7](https://github.com/G-Research/spark-dgraph-connector/issues/7)).
 - **Type system**: The connector can only read data for nodes that have a type ([issue #4](https://github.com/G-Research/spark-dgraph-connector/issues/4)) (`dgraph.type`)

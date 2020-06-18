@@ -1,7 +1,7 @@
 package uk.co.gresearch.spark.dgraph.connector.executor
-import uk.co.gresearch.spark.dgraph.connector.Partition
+import uk.co.gresearch.spark.dgraph.connector.{Partition, Transaction}
 
-case class DgraphExecutorProvider() extends ExecutorProvider {
+case class DgraphExecutorProvider(transaction: Transaction) extends ExecutorProvider {
 
   /**
    * Provide an executor for the given partition.
@@ -10,6 +10,6 @@ case class DgraphExecutorProvider() extends ExecutorProvider {
    * @return an executor
    */
   override def getExecutor(partition: Partition): JsonGraphQlExecutor =
-    DgraphExecutor(partition.targets)
+    DgraphExecutor(transaction, partition.targets)
 
 }

@@ -19,8 +19,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 - Load data from Dgraph cluster as [GraphFrames](https://graphframes.github.io/graphframes/docs/_site/index.html) `GraphFrame`.
+- All partitions are read within the same transaction. This guarantees a consistent snapshot of the graph ([issue #6](https://github.com/G-Research/spark-dgraph-connector/issues/6)).
 - Use exact uid cardinality for uid range partitioning. Combined with predicate partitioning, large
-  predicates get split into more partitions than small predicates.
+  predicates get split into more partitions than small predicates ([issue #2](https://github.com/G-Research/spark-dgraph-connector/issues/2)).
 - Improve performance of `PredicatePartitioner` for a single predicate per partition (`dgraph.partitioner.predicate.predicatesPerPartition=1`).
   This becomes the new default for this partitioner.
 - Move to Spark 3.0.0 release (was 3.0.0-preview2).

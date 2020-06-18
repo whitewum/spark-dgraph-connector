@@ -25,13 +25,14 @@ import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 import uk.co.gresearch.spark.dgraph.connector._
 import uk.co.gresearch.spark.dgraph.connector.encoder.{TypedNodeEncoder, WideNodeEncoder}
-import uk.co.gresearch.spark.dgraph.connector.executor.DgraphExecutorProvider
+import uk.co.gresearch.spark.dgraph.connector.executor.{DgraphExecutorProvider, TransactionProvider}
 import uk.co.gresearch.spark.dgraph.connector.model.NodeTableModel
 import uk.co.gresearch.spark.dgraph.connector.partitioner.PartitionerProvider
 
 class NodeSource() extends TableProviderBase
   with TargetsConfigParser with SchemaProvider
-  with ClusterStateProvider with PartitionerProvider {
+  with ClusterStateProvider with PartitionerProvider
+  with TransactionProvider {
 
   def assertOptions(options: CaseInsensitiveStringMap): Unit = {
     if (getStringOption(NodesModeOption, options).contains(NodesModeWideOption) &&
@@ -64,9 +65,11 @@ class NodeSource() extends TableProviderBase
     assertOptions(options)
 
     val targets = getTargets(options)
+    val transaction = getTransaction(targets)
+    val execution = DgraphExecutorProvider(transaction)
     val schema = getSchema(targets).filter(_.typeName != "uid")
     val clusterState = getClusterState(targets)
-    val partitioner = getPartitioner(schema, clusterState, options)
+    val partitioner = getPartitioner(schema, clusterState, transaction, options)
     val nodeMode = getNodeMode(options)
     val encoder = nodeMode match {
       case Some(NodesModeTypedOption) => TypedNodeEncoder(schema.predicateMap)
@@ -74,7 +77,6 @@ class NodeSource() extends TableProviderBase
       case Some(mode) => throw new IllegalArgumentException(s"Unknown node mode: ${mode}")
       case None => TypedNodeEncoder(schema.predicateMap)
     }
-    val execution = DgraphExecutorProvider()
     val model = NodeTableModel(execution, encoder)
     new TripleTable(partitioner, model, clusterState.cid)
   }

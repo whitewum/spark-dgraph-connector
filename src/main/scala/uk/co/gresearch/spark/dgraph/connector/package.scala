@@ -20,6 +20,7 @@ package uk.co.gresearch.spark.dgraph
 import java.sql.Timestamp
 
 import io.dgraph.DgraphGrpc.DgraphStub
+import io.dgraph.DgraphProto.TxnContext
 import io.dgraph.{DgraphClient, DgraphGrpc}
 import io.grpc.ManagedChannel
 import io.grpc.netty.NettyChannelBuilder
@@ -135,6 +136,8 @@ package object connector {
   def getClientFromTargets(targets: Seq[Target]): DgraphClient = getClientFromStubs(targets.map(toStub))
 
   def getClient(targets: Seq[Target]): DgraphClient = getClientFromTargets(targets)
+
+  case class Transaction(context: TxnContext)
 
   implicit class DgraphDataFrameReader(reader: DataFrameReader) {
 

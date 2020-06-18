@@ -27,13 +27,15 @@ class ConfigPartitionerOption extends PartitionerProviderOption
 
   override def getPartitioner(schema: Schema,
                               clusterState: ClusterState,
+                              transaction: Transaction,
                               options: CaseInsensitiveStringMap): Option[Partitioner] =
     getStringOption(PartitionerOption, options)
-      .map(getPartitioner(_, schema, clusterState, options))
+      .map(getPartitioner(_, schema, clusterState, transaction, options))
 
   def getPartitioner(partitionerName: String,
                              schema: Schema,
                              clusterState: ClusterState,
+                             transaction: Transaction,
                              options: CaseInsensitiveStringMap): Partitioner =
     partitionerName match {
       case SingletonPartitionerOption => SingletonPartitioner(getAllClusterTargets(clusterState))
@@ -46,14 +48,14 @@ class ConfigPartitionerOption extends PartitionerProviderOption
           getIntOption(PredicatePartitionerPredicatesOption, options, PredicatePartitionerPredicatesDefault))
       case UidRangePartitionerOption =>
         val uidsPerPartition = getIntOption(UidRangePartitionerUidsPerPartOption, options, UidRangePartitionerUidsPerPartDefault)
-        val estimator = getEstimatorOption(UidRangePartitionerEstimatorOption, options, UidRangePartitionerEstimatorDefault, clusterState)
+        val estimator = getEstimatorOption(UidRangePartitionerEstimatorOption, options, UidRangePartitionerEstimatorDefault, clusterState, transaction)
         val targets = getAllClusterTargets(clusterState)
         val singleton = SingletonPartitioner(targets)
         UidRangePartitioner(singleton, uidsPerPartition, estimator)
       case option if option.endsWith(s"+${UidRangePartitionerOption}") =>
         val name = option.substring(0, option.indexOf('+'))
-        val partitioner = getPartitioner(name, schema, clusterState, options)
-        getPartitioner(UidRangePartitionerOption, schema, clusterState, options)
+        val partitioner = getPartitioner(name, schema, clusterState, transaction, options)
+        getPartitioner(UidRangePartitionerOption, schema, clusterState, transaction, options)
           .asInstanceOf[UidRangePartitioner].copy(partitioner = partitioner)
       case unknown => throw new IllegalArgumentException(s"Unknown partitioner: $unknown")
     }

@@ -28,10 +28,11 @@ class DefaultPartitionerOption extends ConfigPartitionerOption {
 
   override def getPartitioner(schema: Schema,
                               clusterState: ClusterState,
+                              transaction: Transaction,
                               options: CaseInsensitiveStringMap): Option[Partitioner] =
     if (getStringOption(NodesModeOption, options).contains(NodesModeWideOption))
-      Some(getPartitioner(wideNodeDefaultPartitionerName, schema, clusterState, options))
+      Some(getPartitioner(wideNodeDefaultPartitionerName, schema, clusterState, transaction, options))
     else
-      Some(getPartitioner(defaultPartitionerName, schema, clusterState, options))
+      Some(getPartitioner(defaultPartitionerName, schema, clusterState, transaction, options))
 
 }

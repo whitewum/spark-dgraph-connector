@@ -42,7 +42,8 @@ class TestPartition extends FunSpec with SchemaProvider with DgraphTestCluster {
         val schema = Schema(syntheticPredicates ++ existingPredicates)
         val partition = Partition(targets, Option(schema.predicates), None)
         val encoder = TypedTripleEncoder(schema.predicateMap)
-        val execution = DgraphExecutorProvider()
+        val transaction = Transaction(TxnContext.newBuilder().build())
+        val execution = DgraphExecutorProvider(transaction)
         val model = TripleTableModel(execution, encoder)
         assert(model.modelPartition(partition).length === 44)
       }
